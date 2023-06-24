@@ -1,39 +1,56 @@
 package com.co.controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.stream.Stream;
 
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.hibernate.result.Output;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.servlet.function.ServerRequest.Headers;
 
 import com.co.dto.MailSentReport;
 import com.co.service.CoTriggersService;
 import com.co.serviceinterface.ICoTriggersService;
 import com.lowagie.text.Document;
 import com.lowagie.text.Header;
+import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.val;
 
+@CrossOrigin
 @RestController
 public class CoController {
 
@@ -133,19 +150,32 @@ public class CoController {
 	}
 	
 	@GetMapping("/pdf")
-	public Document pdf(HttpServletRequest request , HttpServletResponse response) throws IOException{
-		response.setContentType("application/pdf");
-		response.setHeader("Content-Disposition", "attachment:filename=report.pdf");
+	public ResponseEntity<byte[]> pdf(HttpServletRequest request , HttpServletResponse response) throws IOException{
 		
-		OutputStream out = response.getOutputStream();
+		
+		HttpHeaders header = new HttpHeaders();
+//		header.add("Content-Disposition", "inline; filename=citiesreport.pdf");
+//		header.setContentDisposition(ContentDisposition.parse("inline; filename=citiesreport.pdf"));
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		
+		FileOutputStream f = new FileOutputStream("2.pdf");
+		
 		Document doc =  new Document();
-		doc.open();
 		
-		Header main = new Header("Name", "Maltesh");
 		PdfWriter.getInstance(doc, out);
-		doc.add(main);
+		doc.open();
+		doc.add(new Paragraph("hi this is malteshdd"));
 		doc.close();
 		
-		return doc;
+		f.write(out.toByteArray());
+		
+
+		
+		return ResponseEntity.ok()
+		.contentType(MediaType.APPLICATION_PDF)
+		.header(HttpHeaders.CONTENT_DISPOSITION.concat("attachment;filename=12.pdf"))
+		.body(out.toByteArray());
+
 	}
 }

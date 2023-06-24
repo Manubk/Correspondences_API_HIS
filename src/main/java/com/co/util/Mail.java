@@ -87,7 +87,7 @@ public class Mail {
 			helper.setText(requirments.getBody());
 			
 			
-			helper.addAttachment("123.pdf", );
+//			helper.addAttachment("123.pdf",);
 			mailSender.send(mail);
 			
 			return true;
